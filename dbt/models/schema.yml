@@ -1,0 +1,8 @@
+version: 2
+
+sources:
+  - name: Example
+    schema: Example
+    tables:
+      - name: Enterprise API
+        identifier: Enterprise API

@@ -1,0 +1,16 @@
+services:
+  dbt:
+    build: .
+    container_name: dwh_dbt
+    restart: unless-stopped
+    networks:
+      - dwh-net
+    ports:
+      - '38082:8081'
+    volumes:
+      - ../../dbt:/usr/app/dbt/dwh
+      - ./config/profiles.yml:/root/.dbt/profiles.yml
+    working_dir: /usr/app/dbt/dwh
+    stdin_open: true
+    tty: true
+    entrypoint: ['sleep', 'infinity']

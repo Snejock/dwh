@@ -1,0 +1,50 @@
+[project]
+name = "dwh"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.13"
+dependencies = []
+
+
+[tool.ruff]
+# Общие настройки
+line-length = 150
+target-version = "py310"
+fix = false
+
+[tool.ruff.lint]
+# Основные правила
+select = ["E", "F", "I", "D", "UP"]
+ignore = [
+    "D100",  # нет докстринга для модуля
+    "D104",  # нет докстринга для пакета
+    "D203",  # несовместимо с black
+    "D213",  # несовместимо с black
+]
+# Исключаем временные и системные папки
+exclude = [
+    "venv",
+    "__pycache__",
+    "logs",
+    "data",
+    "tests/resources",
+]
+
+# Дополнительные категории правил можно подключать тут при необходимости:
+# extend-select = ["B", "C4", "SIM"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["dags", "plugins"]
+combine-as-imports = true
+force-single-line = false
+lines-between-types = 1
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "lf"
+

@@ -1,0 +1,57 @@
+services:
+  metastore:
+    image: apache/hive:4.0.1
+    container_name: dwh-metastore
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - dwh-net
+    ports:
+      - '39083:9083'
+    environment:
+      SERVICE_NAME: metastore
+      HIVE_CONF_DIR: /opt/hive/conf
+      HADOOP_CONF_DIR: /opt/hive/conf
+      DB_DRIVER: postgres
+      HADOOP_CLASSPATH: /opt/hadoop/share/hadoop/tools/lib/*:/opt/hive/lib/*
+      SERVICE_OPTS: >-
+        -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver
+        -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://postgres:5432/${HIVE_PG_DATABASE}
+        -Djavax.jdo.option.ConnectionUserName=${HIVE_PG_USER}
+        -Djavax.jdo.option.ConnectionPassword=${HIVE_PG_PASSWORD}
+        -Dhive.metastore.warehouse.dir=s3a://ice/
+        -Ddatanucleus.autoCreateSchema=true
+        -Ddatanucleus.fixedDatastore=false
+    volumes:
+      - ./drivers/postgresql-42.7.5.jar:/opt/hive/lib/postgres.jar:ro
+      - ./config_metastore:/opt/hive/conf
+      # - /opt/dwh/compose/trino/volumes/storage:/storage:rw  # для локального использования
+    healthcheck:
+      test: ['CMD', 'bash', '-c', '</dev/tcp/localhost/9083']
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  trino:
+    image: trinodb/trino:479
+    container_name: dwh-tr-1
+    restart: unless-stopped
+    depends_on:
+      metastore:
+        condition: service_healthy
+    networks:
+      - dwh-net
+    ports:
+      - '38080:8080'
+    environment:
+      MINIO_USER: ${MINIO_USER}
+      MINIO_PASSWORD: ${MINIO_PASSWORD}
+      USER: ${TRINO_USER}
+    volumes:
+      - ./config_trino:/etc/trino
+      # - /opt/dwh/compose/trino/volumes/storage:/storage:rw  # для локального использования

@@ -1,0 +1,17 @@
+/.idea
+/.venv
+
+# airflow
+airflow/logs
+airflow/config/tg_sensor.session
+
+# dbt
+dbt/target
+dbt/dbt_packages
+dbt/logs
+
+# trino
+compose/trino/drivers
+
+.env
+.session

@@ -1,0 +1,15 @@
+kafka:
+  brokers: ["dwh-rp-1:9092"]
+  # protobuf:
+  #   enabled: true
+  #   schemaRegistry:
+  #     enabled: true
+
+schemaRegistry:
+  enabled: true
+  urls: ["http://dwh-rp-1:8081"]
+
+redpanda:
+  adminApi:
+    enabled: true
+    urls: ["http://dwh-rp-1:9644"]

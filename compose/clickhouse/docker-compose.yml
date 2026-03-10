@@ -1,0 +1,32 @@
+services:
+  clickhouse:
+    image: clickhouse:25.8.8.26-jammy
+    container_name: dwh-ch-1
+    restart: unless-stopped
+    networks:
+      - dwh-net
+    ports:
+      - '38123:8123'  # HTTP интерфейс
+      - '39000:9000'  # Native TCP интерфейс
+      # - '39009:9009'  # HTTP интерфейс для репликации
+    volumes:
+      - dwh-ch-1-data:/var/lib/clickhouse
+      - dwh-ch-1-logs:/var/log/clickhouse-server
+      - ./config:/etc/clickhouse-server
+    environment:
+      - CLICKHOUSE_USER=${CH_USER}
+      - CLICKHOUSE_PASSWORD=${CH_PASSWORD}
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:8123/ping']
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  dwh-ch-1-data:
+    name: dwh-ch-1-data
+    external: true
+  dwh-ch-1-logs:
+    name: dwh-ch-1-logs
+    external: true

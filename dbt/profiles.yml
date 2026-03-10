@@ -1,0 +1,21 @@
+dwh:
+  target: prod
+  outputs:
+    prod:
+      type: trino
+      method: none
+      user: core
+      host: trino
+      port: 8080
+      http_scheme: http
+
+      threads: 1
+
+      database: ice
+      schema: wrk
+
+      timezone: UTC
+
+      # session_properties: # Опционально, для передачи свойств сессии Trino
+        #   query_max_run_time: '1h'
+        #   spill_enabled: 'true'

@@ -1,0 +1,67 @@
+services:
+  dwh-rp-1:
+    image: redpandadata/redpanda:v25.3.10
+    container_name: dwh-rp-1
+    restart: unless-stopped
+    networks:
+      - dwh-net
+    # dns:
+    #   - 192.168.1.10
+    ports:
+      - '39092:19092'  # Kafka API
+      - '39644:9644'   # Admin API
+      - '38081:18081'  # Schema Registry
+    volumes:
+      - dwh-rp-1-data:/var/lib/redpanda/data
+    command:
+      - redpanda
+      - start
+      - --mode=dev-container
+      - --smp=1               # Ограничение на использование ядер
+      - --memory=1G           # Ограничение на использование памяти
+      - --node-id=0
+      - --kafka-addr=internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr=internal://dwh-rp-1:9092,external://192.168.1.10:39092
+      - --pandaproxy-addr=internal://0.0.0.0:8082,external://0.0.0.0:18082
+      - --advertise-pandaproxy-addr=internal://dwh-rp-1:8082,external://192.168.1.10:38082
+      - --schema-registry-addr=internal://0.0.0.0:8081,external://0.0.0.0:18081
+      - --set partition_autobalancing_mode=node_add
+      - --set core_balancing_continuous=false
+      - --set rbac_enabled=false
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9644/v1/status/ready"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  dwh-rp-console:
+    image: redpandadata/console:v3.5.3
+    container_name: dwh-rp-console
+    restart: unless-stopped
+    depends_on:
+      dwh-rp-1:
+        condition: service_healthy
+    networks:
+      - dwh-net
+    # dns:
+    #   - 192.168.1.10
+    ports:
+      - '38088:8080'
+    volumes:
+      - ./redpanda-console-config.yml:/etc/redpanda/redpanda-console-config.yaml
+    environment:
+      CONFIG_FILEPATH: /etc/redpanda/redpanda-console-config.yaml
+      REDPANDA_CONSOLE_ANALYTICS_ENABLED: "false"
+      LOGIN_ENABLED: "false"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  dwh-rp-1-data:
+    name: dwh-rp-1-data
+    external: true
