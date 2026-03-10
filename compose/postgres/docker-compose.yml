@@ -31,4 +31,4 @@ services:
 volumes:
   dwh-pg-1-data:
     name: dwh-pg-1-data
-    external: false
+    external: true
