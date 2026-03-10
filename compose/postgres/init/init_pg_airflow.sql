@@ -24,7 +24,7 @@ GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO core;
 -- Даем все права на все существующие функции в схеме public
 GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO core;
 
--- Важно: Устанавливаем права по умолчанию для БУДУЩИХ объектов,
+-- Важно: Устанавливаем права по умолчанию для будущих объектов,
 -- которые могут быть созданы (например, пользователем airflow) в схеме public.
 -- Это гарантирует, что 'core' будет иметь к ним доступ.
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON TABLES TO core;
