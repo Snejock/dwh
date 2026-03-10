@@ -26,7 +26,7 @@ services:
 volumes:
   dwh-ch-1-data:
     name: dwh-ch-1-data
-    external: false
+    external: true
   dwh-ch-1-logs:
     name: dwh-ch-1-logs
-    external: false
+    external: true
