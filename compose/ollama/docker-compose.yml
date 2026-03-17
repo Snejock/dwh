@@ -31,4 +31,4 @@ services:
 volumes:
   dwh-ol-1-data:
     name: dwh-ol-1-data
-    external: false
+    external: true
