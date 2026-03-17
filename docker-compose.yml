@@ -4,11 +4,11 @@ include:
   - compose/postgres/docker-compose.yml
   - compose/clickhouse/docker-compose.yml
   - compose/redpanda/docker-compose.yml
+  - compose/ollama/docker-compose.yml
   # - compose/minio/docker-compose.yml
   # - compose/airflow/docker-compose.yml
   # - compose/dbt/docker-compose.yml
   # - compose/trino/docker-compose.yml
-  # - compose/ollama/docker-compose.yml
 
 networks:
   dwh-net:
