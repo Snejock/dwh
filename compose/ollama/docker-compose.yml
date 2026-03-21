@@ -1,6 +1,9 @@
 services:
   dwh-ol-1:
-    image: ollama/ollama:0.18.1
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: dwh-ollama:0.18.1
     container_name: dwh-ol-1
     ports:
       - '31434:11434'
