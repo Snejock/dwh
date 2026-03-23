@@ -21,9 +21,9 @@ services:
       - --memory=1G           # Ограничение на использование памяти
       - --node-id=0
       - --kafka-addr=internal://0.0.0.0:9092,external://0.0.0.0:19092
-      - --advertise-kafka-addr=internal://dwh-rp-1:9092,external://192.168.1.10:39092
+      - --advertise-kafka-addr=internal://dwh-rp-1:9092,external://192.168.1.15:39092
       - --pandaproxy-addr=internal://0.0.0.0:8082,external://0.0.0.0:18082
-      - --advertise-pandaproxy-addr=internal://dwh-rp-1:8082,external://192.168.1.10:38082
+      - --advertise-pandaproxy-addr=internal://dwh-rp-1:8082,external://192.168.1.15:38082
       - --schema-registry-addr=internal://0.0.0.0:8081,external://0.0.0.0:18081
       - --set partition_autobalancing_mode=node_add
       - --set core_balancing_continuous=false
