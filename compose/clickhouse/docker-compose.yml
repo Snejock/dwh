@@ -9,6 +9,9 @@ services:
       - '38123:8123'  # HTTP интерфейс
       - '39000:9000'  # Native TCP интерфейс
       # - '39009:9009'  # HTTP интерфейс для репликации
+    extra_hosts:
+      - "odin:192.168.1.10"
+      - "loki:192.168.1.15"
     volumes:
       - dwh-ch-1-data:/var/lib/clickhouse
       - dwh-ch-1-logs:/var/log/clickhouse-server
