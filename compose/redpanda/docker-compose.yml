@@ -8,9 +8,9 @@ services:
     # dns:
     #   - 192.168.1.10
     ports:
-      - '39092:19092'  # Kafka API
-      - '39644:9644'   # Admin API
-      - '38081:18081'  # Schema Registry
+      - "39092:19092"  # Kafka API
+      - "39644:9644"   # Admin API
+      - "38081:18081"  # Schema Registry
     volumes:
       - dwh-rp-1-data:/var/lib/redpanda/data
     command:
@@ -35,6 +35,29 @@ services:
       retries: 5
       start_period: 30s
 
+  dwh-rp-connect:
+    image: redpandadata/connect:4.85.0-ai
+    container_name: dwh-rp-connect
+    restart: unless-stopped
+    depends_on:
+      dwh-rp-1:
+        condition: service_healthy
+      dwh-pg-1:
+        condition: service_healthy
+    networks:
+      - dwh-net
+    ports:
+      - "34195:4195"
+    volumes:
+      - ./config/connect.yaml:/connect.yaml
+    environment:
+      - PG_USER=${PG_USER}
+      - PG_PASSWORD=${PG_PASSWORD}
+      - PG_HOST=dwh-pg-1
+      - PG_PORT=5432
+      - PG_DATABASE=chronica
+    command: [ "-c", "/connect.yaml" ]
+
   dwh-rp-console:
     image: redpandadata/console:v3.5.3
     container_name: dwh-rp-console
@@ -47,9 +70,9 @@ services:
     # dns:
     #   - 192.168.1.10
     ports:
-      - '38088:8080'
+      - "38088:8080"
     volumes:
-      - ./redpanda-console-config.yml:/etc/redpanda/redpanda-console-config.yaml
+      - ./config/redpanda-console-config.yml:/etc/redpanda/redpanda-console-config.yaml
     environment:
       CONFIG_FILEPATH: /etc/redpanda/redpanda-console-config.yaml
       REDPANDA_CONSOLE_ANALYTICS_ENABLED: "false"
