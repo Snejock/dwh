@@ -1,0 +1,37 @@
+input:
+  redpanda:
+    seed_brokers: ["dwh-rp-1:9092"]
+    topics: ["chronica.stg.rss_news"]
+    consumer_group: "chronica.pg.rss_news"
+
+pipeline:
+  processors:
+    - schema_registry_decode:
+        url: "http://dwh-rp-1:8081"
+
+output:
+  sql_raw:
+    driver: postgres
+    dsn: postgres://${PG_USER}:${PG_PASSWORD}@${PG_HOST}:${PG_PORT}/${PG_DATABASE}?sslmode=disable
+    query: |
+      INSERT INTO stg.chr_rss_news (
+        _source_system, published_utc, feed_id, feed_nm, title, summary, link
+      ) VALUES ($1, to_timestamp($2), $3, $4, $5, $6, $7);
+    args_mapping: |
+      let pub = this.published_utc.number().or(0)
+      let pub_seconds = if $pub > 5000000000 { $pub / 1000 } else { $pub }
+      
+      let get_str = fn(val) val.string.string().or(val.string().or(""))
+
+      root = [
+        this.source_system.string().or(""),
+        $pub_seconds,
+        this.feed_id.number().or(0),
+        this.feed_nm.string().or(""),
+        this.title.string().or(""),
+        $get_str(this.summary),
+        this.link.string().or("")
+      ]
+    batching:
+      count: 10
+      period: 1s

@@ -49,14 +49,20 @@ services:
     ports:
       - "34195:4195"
     volumes:
-      - ./config/connect.yaml:/connect.yaml
+      - ./config:/etc/redpanda-connect
+      - ../../rpc/streams:/streams
     environment:
       - PG_USER=${PG_USER}
       - PG_PASSWORD=${PG_PASSWORD}
+      - PG_DATABASE=${PG_DATABASE}
       - PG_HOST=dwh-pg-1
       - PG_PORT=5432
-      - PG_DATABASE=chronica
-    command: [ "-c", "/connect.yaml" ]
+    command: [
+      "streams",
+      "-o", "/etc/redpanda-connect/connect.yml",
+      # "-r", "/etc/redpanda-connect/resources.yml",
+      "/streams"
+    ]
 
   dwh-rp-console:
     image: redpandadata/console:v3.5.3
@@ -72,9 +78,9 @@ services:
     ports:
       - "38088:8080"
     volumes:
-      - ./config/redpanda-console-config.yml:/etc/redpanda/redpanda-console-config.yaml
+      - ./config/redpanda-console-config.yml:/etc/redpanda/redpanda-console-config.yml
     environment:
-      CONFIG_FILEPATH: /etc/redpanda/redpanda-console-config.yaml
+      CONFIG_FILEPATH: /etc/redpanda/redpanda-console-config.yml
       REDPANDA_CONSOLE_ANALYTICS_ENABLED: "false"
       LOGIN_ENABLED: "false"
     healthcheck:
