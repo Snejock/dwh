@@ -36,7 +36,7 @@ services:
       start_period: 30s
 
   dwh-rp-connect:
-    image: redpandadata/connect:4.85.0-ai
+    image: redpandadata/connect:4.86-ai
     container_name: dwh-rp-connect
     restart: unless-stopped
     depends_on:
@@ -60,7 +60,7 @@ services:
     command: [
       "streams",
       "-o", "/etc/redpanda-connect/connect.yml",
-      # "-r", "/etc/redpanda-connect/resources.yml",
+      "-r", "/etc/redpanda-connect/resources.yml",
       "/streams"
     ]
 

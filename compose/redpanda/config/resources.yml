@@ -4,3 +4,8 @@ output_resources:
     sql_raw:
       driver: postgres
       dsn: postgres://${PG_USER}:${PG_PASSWORD}@${PG_HOST}:${PG_PORT}/${PG_DATABASE}?sslmode=disable
+
+cache_resources:
+  - label: link_cache
+    memory:
+      default_ttl: 24h
