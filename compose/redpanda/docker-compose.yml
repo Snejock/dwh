@@ -50,7 +50,7 @@ services:
       - "34195:4195"
     volumes:
       - ./config:/etc/redpanda-connect
-      - ../../rpc/streams:/streams
+      - /media/data/projects/chronica/rpc/streams:/streams
     environment:
       - PG_USER=${PG_USER}
       - PG_PASSWORD=${PG_PASSWORD}
