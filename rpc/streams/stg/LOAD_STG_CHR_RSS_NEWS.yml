@@ -21,15 +21,13 @@ output:
       let pub = this.published_utc.number().or(0)
       let pub_seconds = if $pub > 5000000000 { $pub / 1000 } else { $pub }
       
-      let get_str = fn(val) val.string.string().or(val.string().or(""))
-
       root = [
         this.source_system.string().or(""),
         $pub_seconds,
         this.feed_id.number().or(0),
         this.feed_nm.string().or(""),
         this.title.string().or(""),
-        $get_str(this.summary),
+        this.summary.string().or(""),
         this.link.string().or("")
       ]
     batching:
