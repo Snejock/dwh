@@ -6,6 +6,12 @@ output_resources:
       dsn: postgres://${PG_USER}:${PG_PASSWORD}@${PG_HOST}:${PG_PORT}/${PG_DATABASE}?sslmode=disable
 
 cache_resources:
-  - label: link_cache
-    memory:
+  - label: pg_stg_chr_rss_news
+    redis:
+      url: redis://dwh-rd-1:6379
+      default_ttl: 24h
+
+  - label: pg_dtl_h_chr_rss_news
+    redis:
+      url: redis://dwh-rd-1:6379
       default_ttl: 24h
