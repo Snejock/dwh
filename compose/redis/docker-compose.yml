@@ -28,4 +28,4 @@ services:
 volumes:
   dwh-rd-1-data:
     name: dwh-rd-1-data
-    external: false
+    external: true
