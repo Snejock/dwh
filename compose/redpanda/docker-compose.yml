@@ -59,6 +59,7 @@ services:
       - PG_PORT=5432
     command: [
       "streams",
+      "-w",
       "-o", "/etc/redpanda-connect/connect.yml",
       "-r", "/etc/redpanda-connect/resources.yml",
       "/streams"
