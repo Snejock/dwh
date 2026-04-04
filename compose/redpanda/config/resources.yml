@@ -1,10 +1,4 @@
 # /etc/redpanda-connect/resources.yml
-output_resources:
-  - label: dwh-pg-1
-    sql_raw:
-      driver: postgres
-      dsn: postgres://${PG_USER}:${PG_PASSWORD}@${PG_HOST}:${PG_PORT}/${PG_DATABASE}?sslmode=disable
-
 cache_resources:
   - label: pg_dtl_d_chr_rss_feeds
     redis:
