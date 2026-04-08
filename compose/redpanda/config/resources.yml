@@ -19,3 +19,8 @@ cache_resources:
     redis:
       url: redis://dwh-rd-1:6379
       default_ttl: 24h
+
+  - label: pg_dtl_s_chr_rss_news_embeddings
+    redis:
+      url: redis://dwh-rd-1:6379
+      default_ttl: 24h
