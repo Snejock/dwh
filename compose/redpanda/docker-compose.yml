@@ -34,6 +34,11 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   dwh-rp-connect:
     image: redpandadata/connect:4.86-ai
@@ -64,6 +69,11 @@ services:
       "-r", "/etc/redpanda-connect/resources.yml",
       "/streams"
     ]
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   dwh-rp-console:
     image: redpandadata/console:v3.5.3
@@ -90,6 +100,11 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   dwh-rp-1-data:
