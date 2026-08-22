@@ -1,0 +1,26 @@
+<!--
+  Кластер для шардирования (Distributed engine, без репликации, без Keeper).
+  Файл идентичен на обоих серверах (odin и loki) — синхронизируйте при изменении.
+
+  network_mode: host у контейнера => обращение идёт напрямую на native-порт
+  ClickHouse (9000) на LAN-адресе соседнего сервера, без проброса портов.
+  Хосты odin/loki резолвятся через extra_hosts в docker-compose.yaml.
+-->
+<clickhouse>
+    <remote_servers>
+        <sharded>
+            <shard>
+                <replica>
+                    <host>odin</host>
+                    <port>9000</port>
+                </replica>
+            </shard>
+            <shard>
+                <replica>
+                    <host>loki</host>
+                    <port>9000</port>
+                </replica>
+            </shard>
+        </sharded>
+    </remote_servers>
+</clickhouse>

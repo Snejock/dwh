@@ -1,0 +1,46 @@
+<!--
+  ClickHouse Keeper, встроенный в clickhouse-server (отдельный контейнер не нужен).
+  Файл идентичен на обоих серверах (odin и loki).
+  Единственное различие между узлами — server_id, он берётся из переменной
+  окружения контейнера CLICKHOUSE__KEEPER_SERVER_ID (см. .env.odin/.env.loki).
+-->
+<clickhouse>
+    <keeper_server>
+        <tcp_port>9181</tcp_port>
+        <server_id from_env="CLICKHOUSE__KEEPER_SERVER_ID"/>
+        <log_storage_path>/var/lib/clickhouse/coordination/log</log_storage_path>
+        <snapshot_storage_path>/var/lib/clickhouse/coordination/snapshots</snapshot_storage_path>
+
+        <coordination_settings>
+            <operation_timeout_ms>10000</operation_timeout_ms>
+            <session_timeout_ms>30000</session_timeout_ms>
+            <raft_logs_level>warning</raft_logs_level>
+        </coordination_settings>
+
+        <raft_configuration>
+            <server>
+                <id>1</id>
+                <hostname>odin</hostname>
+                <port>9234</port>
+            </server>
+            <server>
+                <id>2</id>
+                <hostname>loki</hostname>
+                <port>9234</port>
+            </server>
+        </raft_configuration>
+    </keeper_server>
+
+    <!-- ClickHouse-серверу нужно знать, где искать Keeper для DDL-очереди
+         (ON CLUSTER) и, в будущем, для ReplicatedMergeTree. -->
+    <zookeeper>
+        <node>
+            <host>odin</host>
+            <port>9181</port>
+        </node>
+        <node>
+            <host>loki</host>
+            <port>9181</port>
+        </node>
+    </zookeeper>
+</clickhouse>
