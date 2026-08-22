@@ -1,0 +1,9 @@
+name: dwh
+
+include:
+  - compose/clickhouse/docker-compose.yaml
+
+networks:
+  dwh-net:
+    driver: bridge
+    name: dwh-net

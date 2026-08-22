@@ -1,0 +1,23 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+.DS_Store
+build/
+dist/
+wheels/
+*.egg-info
+
+# IDE
+.idea
+
+# Environments and sessions
+.venv
+.env*
+
+# Logs
+*.log*
+
+# DBT
+dwh/dbt/target/
+dwh/dbt/dbt_packages/
+dwh/dbt/logs/
