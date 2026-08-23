@@ -10,7 +10,7 @@
       <networks>
         <ip>::/0</ip>
       </networks>
-      <password><![CDATA[core]]></password>
+      <password from_env="CLICKHOUSE_PASSWORD" />
       <quota>default</quota>
       <access_management>0</access_management>
     </core>

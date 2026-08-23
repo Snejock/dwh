@@ -26,7 +26,13 @@ CLICKHOUSE__NODE_NAME=dwh-ch-1          # dwh-ch-1 на odin, dwh-ch-2 на loki
 CLICKHOUSE__ODIN_IP=...                 # IP сервера odin
 CLICKHOUSE__LOKI_IP=...                 # IP сервера loki
 CLICKHOUSE__KEEPER_SERVER_ID=1          # 1 на odin, 2 на loki — должны различаться
+CLICKHOUSE__USER=...                    # логин для межшардовых Distributed-запросов
+CLICKHOUSE__PASSWORD=...                # пароль пользователя
 ```
+
+Логин/пароль для межшардовых Distributed-запросов не зашиты в XML:
+`config.d/cluster.xml` читает их через `from_env` из переменных окружения
+контейнера `CLICKHOUSE_USER` / `CLICKHOUSE_PASSWORD`.
 
 ## Развёртывание
 

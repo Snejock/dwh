@@ -13,12 +13,16 @@
                 <replica>
                     <host>odin</host>
                     <port>9000</port>
+                    <user from_env="CLICKHOUSE_USER" />
+                    <password from_env="CLICKHOUSE_PASSWORD" />
                 </replica>
             </shard>
             <shard>
                 <replica>
                     <host>loki</host>
                     <port>9000</port>
+                    <user from_env="CLICKHOUSE_USER" />
+                    <password from_env="CLICKHOUSE_PASSWORD" />
                 </replica>
             </shard>
         </sharded>

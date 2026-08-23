@@ -15,6 +15,8 @@ services:
     environment:
       # server_id для ClickHouse Keeper — свой на каждом узле, см. .env.odin/.env.loki
       - CLICKHOUSE__KEEPER_SERVER_ID=${CLICKHOUSE__KEEPER_SERVER_ID}
+      - CLICKHOUSE_USER=${CLICKHOUSE__USER}
+      - CLICKHOUSE_PASSWORD=${CLICKHOUSE__PASSWORD}
     volumes:
       - ch-data:/var/lib/clickhouse
       - ch-logs:/var/log/clickhouse-server
