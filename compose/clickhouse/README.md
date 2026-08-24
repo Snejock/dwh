@@ -32,7 +32,9 @@ CLICKHOUSE__PASSWORD=...                # пароль пользователя
 
 Логин/пароль для межшардовых Distributed-запросов не зашиты в XML:
 `config.d/cluster.xml` читает их через `from_env` из переменных окружения
-контейнера `CLICKHOUSE_USER` / `CLICKHOUSE_PASSWORD`.
+контейнера `CLICKHOUSE_USER` / `CLICKHOUSE_PASSWORD`. Аналогично `server_id`
+для Keeper читается из переменной окружения контейнера
+`CLICKHOUSE_KEEPER_SERVER_ID`.
 
 ## Развёртывание
 
