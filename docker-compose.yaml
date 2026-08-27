@@ -4,6 +4,7 @@ include:
   - compose/clickhouse/docker-compose.yaml
   - compose/postgres/docker-compose.yaml
   - compose/minio/docker-compose.yaml
+  - compose/redpanda/docker-compose.yaml
 
 networks:
   dwh-net:
