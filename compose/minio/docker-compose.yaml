@@ -23,3 +23,4 @@ services:
 volumes:
   dwh-s3-data:
     name: dwh-s3-data
+    external: true
