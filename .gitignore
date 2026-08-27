@@ -28,3 +28,9 @@ rpc/chronica/*
 rpc/signalfire/*
 !rpc/chronica/.gitkeep
 !rpc/signalfire/.gitkeep
+
+# Файлы миграций подтягиваются на сервер CI-джобами проектов
+migrations/chronica/*
+migrations/signalfire/*
+!migrations/chronica/.gitkeep
+!migrations/signalfire/.gitkeep
