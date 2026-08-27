@@ -21,3 +21,10 @@ wheels/
 dwh/dbt/target/
 dwh/dbt/dbt_packages/
 dwh/dbt/logs/
+
+# Стримы redpanda-connect подтягиваются на сервер CI-джобами проектов
+# в git dwh не хранятся
+rpc/chronica/*
+rpc/signalfire/*
+!rpc/chronica/.gitkeep
+!rpc/signalfire/.gitkeep
