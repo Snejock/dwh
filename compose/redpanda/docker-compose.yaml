@@ -82,6 +82,40 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  # Настройка retention политики для топика _schemas
+  dwh-rp-schema-registry-init:
+    image: redpandadata/redpanda:v25.3.10
+    container_name: dwh-rp-schema-registry-init
+    restart: "no"
+    networks:
+      - dwh-net
+    depends_on:
+      dwh-rp-1:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        rpk topic create _schemas -p 1 -r 1 \
+          -c cleanup.policy=compact \
+          -c retention.ms=-1 \
+          -c retention.bytes=-1 \
+          -c retention.local.target.ms=-1 \
+          -c retention.local.target.bytes=-1 \
+          -X brokers=dwh-rp-1:9092 \
+        || rpk topic alter-config _schemas \
+          --set cleanup.policy=compact \
+          --set retention.ms=-1 \
+          --set retention.bytes=-1 \
+          --set retention.local.target.ms=-1 \
+          --set retention.local.target.bytes=-1 \
+          -X brokers=dwh-rp-1:9092
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   dwh-rp-console:
     image: redpandadata/console:v3.5.3
     container_name: dwh-rp-console
@@ -89,6 +123,8 @@ services:
     depends_on:
       dwh-rp-1:
         condition: service_healthy
+      dwh-rp-schema-registry-init:
+        condition: service_completed_successfully
     networks:
       - dwh-net
     # dns:
