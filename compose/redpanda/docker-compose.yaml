@@ -152,4 +152,4 @@ services:
 volumes:
   dwh-rp-1-data:
     name: dwh-rp-1-data
-    external: true
+    external: false
