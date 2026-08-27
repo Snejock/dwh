@@ -1,0 +1,11 @@
+# /etc/redpanda-connect/connect.yaml
+http:
+  enabled: true
+  address: 0.0.0.0:4195
+
+logger:
+  level: WARN
+  format: logfmt
+  file:
+    rotate: true
+    rotate_max_age_days: 3

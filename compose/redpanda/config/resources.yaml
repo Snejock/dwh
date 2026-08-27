@@ -1,0 +1,14 @@
+# /etc/redpanda-connect/resources.yaml
+cache_resources:
+  - label: redis_cache
+    redis:
+      url: redis://dwh-rd-1:6379
+      default_ttl: 24h
+
+rate_limit_resources:
+  # бесплатный тариф GeoNames — ~1000 запросов/час на username, при превышении бан;
+  # установлено ~900/час с запасом
+  - label: geonames_api
+    local:
+      count: 1
+      interval: 4s
