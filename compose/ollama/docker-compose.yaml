@@ -1,0 +1,37 @@
+services:
+  dwh-ol-1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: dwh-ollama:0.18.1
+    container_name: dwh-ol-1
+    ports:
+      - '31434:11434'
+    tty: true
+    restart: unless-stopped
+    environment:
+      - OLLAMA_KEEP_ALIVE=24h
+    networks:
+      - dwh-net
+    dns:
+      - 192.168.1.10
+    volumes:
+      - dwh-ol-1-data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:11434/api/tags']
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  dwh-ol-1-data:
+    name: dwh-ol-1-data
+    external: true

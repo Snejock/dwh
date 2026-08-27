@@ -5,6 +5,8 @@ include:
   - compose/postgres/docker-compose.yaml
   - compose/minio/docker-compose.yaml
   - compose/redpanda/docker-compose.yaml
+  - compose/redis/docker-compose.yaml
+  - compose/ollama/docker-compose.yaml
 
 networks:
   dwh-net:
