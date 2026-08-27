@@ -2,6 +2,7 @@ name: dwh
 
 include:
   - compose/clickhouse/docker-compose.yaml
+  - compose/postgres/docker-compose.yaml
 
 networks:
   dwh-net:
