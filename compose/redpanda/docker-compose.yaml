@@ -40,49 +40,6 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  dwh-rp-connect:
-    image: redpandadata/connect:4.106
-    container_name: dwh-rp-connect
-    restart: unless-stopped
-    depends_on:
-      dwh-rp-1:
-        condition: service_healthy
-      dwh-pg-1:
-        condition: service_healthy
-    networks:
-      - dwh-net
-    ports:
-      - "34195:4195"
-    volumes:
-      - ./config:/etc/redpanda-connect
-      - ../../rpc:/streams:ro
-      - ../../migrations:/migrations:ro
-    environment:
-      - PG_USER=${POSTGRES__USER}
-      - PG_PASSWORD=${POSTGRES__PASSWORD}
-      - PG_DATABASE=${POSTGRES__DATABASE}
-      - PG_HOST=${POSTGRES__HOST}
-      - PG_PORT=${POSTGRES__PORT}
-      - DEEPSEEK_API_KEY=${DEEPSEEK__API_KEY}
-      - GEONAMES_USERNAME=${GEONAMES__USERNAME}
-      - MINIO_USER=${MINIO__USER}
-      - MINIO_PASSWORD=${MINIO__PASSWORD}
-      - MINIO_ENDPOINT=${MINIO__ENDPOINT}
-      - MINIO_BUCKET_ACTOR_MEDIA=${MINIO__BUCKET_ACTOR_MEDIA}
-      - MINIO_PUBLIC_BASE_URL=${MINIO__PUBLIC_BASE_URL}
-    command: [
-      "streams",
-      "-w",
-      "-o", "/etc/redpanda-connect/connect.yaml",
-      "-r", "/etc/redpanda-connect/resources.yaml",
-      "/streams"
-    ]
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
   # Настройка retention политики для топика _schemas
   dwh-rp-schema-registry-init:
     image: redpandadata/redpanda:v26.2.2
@@ -149,6 +106,50 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+#  Контейнер запускается в каждом проекте отдельно
+#  dwh-rp-connect:
+#    image: redpandadata/connect:4.106
+#    container_name: dwh-rp-connect
+#    restart: unless-stopped
+#    depends_on:
+#      dwh-rp-1:
+#        condition: service_healthy
+#      dwh-pg-1:
+#        condition: service_healthy
+#    networks:
+#      - dwh-net
+#    ports:
+#      - "34195:4195"
+#    volumes:
+#      - ./config:/etc/redpanda-connect
+#      - ../../rpc:/streams:ro
+#      - ../../migrations:/migrations:ro
+#    environment:
+#      - PG_USER=${POSTGRES__USER}
+#      - PG_PASSWORD=${POSTGRES__PASSWORD}
+#      - PG_DATABASE=${POSTGRES__DATABASE}
+#      - PG_HOST=${POSTGRES__HOST}
+#      - PG_PORT=${POSTGRES__PORT}
+#      - DEEPSEEK_API_KEY=${DEEPSEEK__API_KEY}
+#      - GEONAMES_USERNAME=${GEONAMES__USERNAME}
+#      - MINIO_USER=${MINIO__USER}
+#      - MINIO_PASSWORD=${MINIO__PASSWORD}
+#      - MINIO_ENDPOINT=${MINIO__ENDPOINT}
+#      - MINIO_BUCKET_ACTOR_MEDIA=${MINIO__BUCKET_ACTOR_MEDIA}
+#      - MINIO_PUBLIC_BASE_URL=${MINIO__PUBLIC_BASE_URL}
+#    command: [
+#      "streams",
+#      "-w",
+#      "-o", "/etc/redpanda-connect/connect.yaml",
+#      "-r", "/etc/redpanda-connect/resources.yaml",
+#      "/streams"
+#    ]
+#    logging:
+#      driver: "json-file"
+#      options:
+#        max-size: "10m"
+#        max-file: "3"
 
 volumes:
   dwh-rp-1-data:
