@@ -27,7 +27,7 @@ USER airflow
 RUN pip install --no-cache-dir \
     "apache-airflow-providers-docker==4.4.3" \
     "apache-airflow-providers-trino==6.3.3" \
-    "clickhouse-driver==0.2.9" \
+    "clickhouse-driver==0.2.11" \
     "apache-airflow-providers-fab"
 
 USER root
