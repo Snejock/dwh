@@ -104,7 +104,7 @@ services:
     networks:
       - dwh-net
     ports:
-      - '38081:8080'
+      - '38090:8080'
     user: "${AIRFLOW_UID:-50000}"
     depends_on:
       <<: *airflow-common-depends-on
