@@ -22,6 +22,7 @@
 (scp) либо просто создать `.env` руками с нужными значениями:
 
 ```dotenv
+COMPOSE_PROFILES=odin                   # odin на odin, loki на loki — см. "Развёртывание" ниже
 CLICKHOUSE__NODE_NAME=dwh-ch-1          # dwh-ch-1 на odin, dwh-ch-2 на loki
 CLICKHOUSE__ODIN_IP=...                 # IP сервера odin
 CLICKHOUSE__LOKI_IP=...                 # IP сервера loki
@@ -41,13 +42,24 @@ CLICKHOUSE__PASSWORD=...                # пароль пользователя
 На каждом сервере (репозиторий склонирован/скопирован целиком, `.env` создан
 как описано выше):
 
-```bash
-# на odin
-docker compose up -d
+Важно: корневой `docker-compose.yaml` через `include:` объединяет в один
+проект вообще все сервисы репозитория (postgres, minio, redpanda, redis,
+ollama, airflow), а `.env.odin` содержит переменные только для ClickHouse.
+Чтобы на каждом хосте поднимался только нужный набор сервисов, у каждого
+сервиса явно задан `profiles:` — например, `dwh-ch` помечен сразу
+`[odin, loki]` (поднимается на обоих хостах), а postgres/minio/redpanda/
+redis/ollama/airflow — только `[loki]`. Активный профиль подставляется
+автоматически через `COMPOSE_PROFILES` в `.env.odin`/`.env.loki`, поэтому
+на обоих хостах команда одна и та же:
 
-# на loki
+```bash
 docker compose up -d
 ```
+
+На odin поднимется только `dwh-ch`, на loki — весь стек (включая `dwh-ch`).
+Без `.env`/`COMPOSE_PROFILES` (например, при `docker compose up -d` в
+свежем клоне без переменных) не поднимется вообще ничего — это осознанный
+защитный эффект, а не баг.
 
 Контейнер использует `network_mode: host` — слушает порты напрямую на
 интерфейсе сервера, без проброса. Из-за этого наружу открыты все порты,

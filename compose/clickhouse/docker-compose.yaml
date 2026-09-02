@@ -4,6 +4,7 @@ services:
     container_name: ${CLICKHOUSE__NODE_NAME}
     hostname: ${CLICKHOUSE__NODE_NAME}
     restart: unless-stopped
+    profiles: [odin, loki]
     # host-сеть: контейнер слушает порты (8123/9000/...) напрямую на интерфейсе хоста,
     # без NAT/docker-proxy — минимальная задержка для межсерверных запросов кластера.
     # Работает только на Linux-хостах. ВАЖНО: теперь наружу открыты ВСЕ порты,

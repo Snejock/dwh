@@ -3,6 +3,8 @@ services:
     image: redpandadata/redpanda:v26.2.2
     container_name: dwh-rp-1
     restart: unless-stopped
+    profiles:
+      - loki
     networks:
       - dwh-net
     dns:
@@ -45,6 +47,8 @@ services:
     image: redpandadata/redpanda:v26.2.2
     container_name: dwh-rp-schema-registry-init
     restart: "no"
+    profiles:
+      - loki
     networks:
       - dwh-net
     depends_on:
@@ -78,6 +82,8 @@ services:
     image: redpandadata/console:v3.11.0
     container_name: dwh-rp-console
     restart: unless-stopped
+    profiles:
+      - loki
     depends_on:
       dwh-rp-1:
         condition: service_healthy

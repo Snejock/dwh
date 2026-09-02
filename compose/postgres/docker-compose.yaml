@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
     container_name: dwh-pg-1
     restart: unless-stopped
+    profiles:
+      - loki
     shm_size: 128mb
     networks:
       - dwh-net

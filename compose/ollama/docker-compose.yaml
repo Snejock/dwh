@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
     image: dwh-ollama:0.33.1
     container_name: dwh-ol-1
+    profiles:
+      - loki
     ports:
       - '31434:11434'
     tty: true
