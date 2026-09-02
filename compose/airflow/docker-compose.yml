@@ -96,9 +96,9 @@ services:
   #     retries: 5
   #     start_period: 30s
 
-  airflow-apiserver:
+  dwh-airflow-apiserver:
     <<: *airflow-common
-    container_name: dwh_airflow_apiserver
+    container_name: dwh-airflow-apiserver
     restart: unless-stopped
     command: api-server
     networks:
@@ -117,9 +117,9 @@ services:
       retries: 5
       start_period: 30s
 
-  airflow-scheduler:
+  dwh-airflow-scheduler:
     <<: *airflow-common
-    container_name: dwh_airflow_scheduler
+    container_name: dwh-airflow-scheduler
     restart: unless-stopped
     command: scheduler
     depends_on:
@@ -133,9 +133,9 @@ services:
       retries: 5
       start_period: 30s
 
-  airflow-dag-processor:
+  dwh-airflow-dag-processor:
     <<: *airflow-common
-    container_name: dwh_airflow_dag_processor
+    container_name: dwh-airflow-dag-processor
     command: dag-processor
     restart: unless-stopped
     depends_on:
@@ -149,9 +149,9 @@ services:
       retries: 5
       start_period: 30s
 
-  airflow-worker:
+  dwh-airflow-worker:
     <<: *airflow-common
-    container_name: dwh_airflow_worker
+    container_name: dwh-airflow-worker
     command: celery worker
     restart: unless-stopped
     environment:
@@ -174,9 +174,9 @@ services:
       retries: 5
       start_period: 30s
 
-  airflow-triggerer:
+  dwh-airflow-triggerer:
     <<: *airflow-common
-    container_name: dwh_airflow_triggerer
+    container_name: dwh-airflow-triggerer
     command: triggerer
     restart: always
     depends_on:
@@ -190,9 +190,9 @@ services:
       retries: 5
       start_period: 30s
 
-  airflow-init:
+  dwh-airflow-init:
     <<: *airflow-common
-    container_name: dwh_airflow_init
+    container_name: dwh-airflow-init
     entrypoint: /bin/bash
     command:
       - -c
@@ -281,9 +281,9 @@ services:
       _PIP_ADDITIONAL_REQUIREMENTS: ''
     user: '0:0'
 
-  airflow-cli:
+  dwh-airflow-cli:
     <<: *airflow-common
-    container_name: dwh_airflow_cli
+    container_name: dwh-airflow-cli
     profiles:
       - debug
     environment:
