@@ -7,6 +7,7 @@ include:
   - compose/redpanda/docker-compose.yaml
   - compose/redis/docker-compose.yaml
   - compose/ollama/docker-compose.yaml
+  - compose/airflow/docker-compose.yml
 
 networks:
   dwh-net:
