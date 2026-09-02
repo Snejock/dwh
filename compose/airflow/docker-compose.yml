@@ -47,7 +47,7 @@ x-airflow-common:
     AIRFLOW__CORE__FERNET_KEY: ''
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
-    AIRFLOW__CORE__EXECUTION_API_SERVER_URL: 'http://airflow-apiserver:8080/execution/'
+    AIRFLOW__CORE__EXECUTION_API_SERVER_URL: 'http://dwh-airflow-apiserver:8080/execution/'
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
     AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'
     # dbt-проекты монтируются по одному на каждый проект (см. volumes ниже:
@@ -108,7 +108,7 @@ services:
     user: "${AIRFLOW_UID:-50000}"
     depends_on:
       <<: *airflow-common-depends-on
-      airflow-init:
+      dwh-airflow-init:
         condition: service_completed_successfully
     healthcheck:
       test: ['CMD', 'curl', '--fail', 'http://localhost:8080/api/v2/version']
@@ -124,7 +124,7 @@ services:
     command: scheduler
     depends_on:
       <<: *airflow-common-depends-on
-      airflow-init:
+      dwh-airflow-init:
         condition: service_completed_successfully
     healthcheck:
       test: ['CMD', 'curl', '--fail', 'http://localhost:8974/health']
@@ -140,7 +140,7 @@ services:
     restart: unless-stopped
     depends_on:
       <<: *airflow-common-depends-on
-      airflow-init:
+      dwh-airflow-init:
         condition: service_completed_successfully
     healthcheck:
       test: ['CMD-SHELL', 'airflow jobs check --job-type DagProcessorJob --hostname "$$(hostname)"']
@@ -161,9 +161,9 @@ services:
       DUMB_INIT_SETSID: '0'
     depends_on:
       <<: *airflow-common-depends-on
-      airflow-apiserver:
+      dwh-airflow-apiserver:
         condition: service_healthy
-      airflow-init:
+      dwh-airflow-init:
         condition: service_completed_successfully
     healthcheck:
       test:
@@ -181,7 +181,7 @@ services:
     restart: always
     depends_on:
       <<: *airflow-common-depends-on
-      airflow-init:
+      dwh-airflow-init:
         condition: service_completed_successfully
     healthcheck:
       test: ['CMD-SHELL', 'airflow jobs check --job-type TriggererJob --hostname "$${HOSTNAME}"']
