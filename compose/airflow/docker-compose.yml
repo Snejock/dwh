@@ -58,6 +58,7 @@ x-airflow-common:
     # Это, в свою очередь, сильно нагружает cadvisor на хосте (см. fsHandler-сканы
     # размера writable-слоя на каждом housekeeping-цикле).
     PYTHONDONTWRITEBYTECODE: 'true'
+    HOME: /home/airflow
     # dbt-проекты монтируются по одному на каждый проект (см. volumes ниже:
     # /opt/dbt/<project> + /opt/dbt-profiles/<project>/profiles.yml)
   networks:
