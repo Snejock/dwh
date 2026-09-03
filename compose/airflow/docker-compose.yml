@@ -7,7 +7,7 @@
 #
 # AIRFLOW_IMAGE_NAME           - имя Docker-образа для запуска Airflow.
 #                                По умолчанию: apache/airflow:3.3.1
-# AIRFLOW_UID                  - UID пользователя в контейнерах Airflow.
+# AIRFLOW__UID                 - UID пользователя в контейнерах Airflow.
 #                                По умолчанию: 50000
 # Эти настройки полезны в основном для автономного тестирования/пробного запуска Airflow.
 #
@@ -29,7 +29,7 @@ x-airflow-common:
     context: .
     args:
       - AIRFLOW_IMAGE_NAME=${AIRFLOW_IMAGE_NAME:-apache/airflow:3.3.1}
-      - DOCKER_GID=${DOCKER_GID:-986}
+      - DOCKER_GID=${DOCKER__GID:-986}
   profiles:
     - loki
   dns:
@@ -45,6 +45,7 @@ x-airflow-common:
     # db 1, чтобы не пересекаться с redpanda-connect (использует db 0).
     AIRFLOW__CELERY__BROKER_URL: redis://:@dwh-rd-1:6379/1
     AIRFLOW__CORE__FERNET_KEY: ''
+    AIRFLOW__API__SECRET_KEY: ${AIRFLOW__API_SECRET_KEY:?AIRFLOW__API_SECRET_KEY не задан в .env}
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL: 'http://dwh-airflow-apiserver:8080/execution/'
@@ -55,19 +56,20 @@ x-airflow-common:
   networks:
     - dwh-net
   volumes:
-    # logs/config/plugins — именованные volume (см. volumes: в конце файла).
+    # logs/plugins — именованные volume (см. volumes: в конце файла).
     # Директории с правильными правами уже созданы в образе (см. Dockerfile),
     # Docker наполнит ими volume при первом использовании.
     - dwh-airflow-logs-data:/opt/airflow/logs
-    - dwh-airflow-config-data:/opt/airflow/config
     - dwh-airflow-plugins-data:/opt/airflow/plugins
+    # config — в репозитории (см. ./config/airflow.cfg), не в volume.
+    - ./config:/opt/airflow/config
     # dags и dbt-проекты — по одному на каждый бизнес-проект, монтируем явно.
     # Добавляйте по три volume на новый проект (dags, dbt-код, profiles.yml).
     - ../../../signalfire/dwh/dags:/opt/airflow/dags/signalfire
     - ../../../signalfire/dwh/dbt:/opt/dbt/signalfire
     - ../../../signalfire/dwh/compose/dbt/config/profiles.yml:/opt/dbt-profiles/signalfire/profiles.yml
     - /var/run/docker.sock:/var/run/docker.sock
-  # user: '${AIRFLOW_UID:-50000}:0'
+  # user: '${AIRFLOW__UID:-50000}:0'
   user: root  # нужны права root для доступа к docker.sock
   depends_on:
     &airflow-common-depends-on
@@ -105,7 +107,7 @@ services:
       - dwh-net
     ports:
       - '38090:8080'
-    user: "${AIRFLOW_UID:-50000}"
+    user: "${AIRFLOW__UID:-50000}"
     depends_on:
       <<: *airflow-common-depends-on
       dwh-airflow-init:
@@ -197,15 +199,15 @@ services:
     command:
       - -c
       - |
-        if [[ -z "${AIRFLOW_UID}" ]]; then
+        if [[ -z "${AIRFLOW__UID}" ]]; then
           echo
-          echo -e "\033[1;33mWARNING!!!: AIRFLOW_UID not set!\e[0m"
+          echo -e "\033[1;33mWARNING!!!: AIRFLOW__UID not set!\e[0m"
           echo "If you are on Linux, you SHOULD follow the instructions below to set "
-          echo "AIRFLOW_UID environment variable, otherwise files will be owned by root."
+          echo "AIRFLOW__UID environment variable, otherwise files will be owned by root."
           echo "For other operating systems you can get rid of the warning with manually created .env file:"
           echo "    See: https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html#setting-the-right-airflow-user"
           echo
-          export AIRFLOW_UID=$$(id -u)
+          export AIRFLOW__UID=$$(id -u)
         fi
         one_meg=1048576
         mem_available=$$(($$(getconf _PHYS_PAGES) * $$(getconf PAGE_SIZE) / one_meg))
@@ -243,34 +245,26 @@ services:
         echo
         echo "Creating missing opt dirs if missing:"
         echo
-        mkdir -v -p /opt/airflow/{logs,dags,plugins,config}
+        mkdir -v -p /opt/airflow/{logs,dags,plugins}
         echo
         echo "Airflow version:"
         /entrypoint airflow version
         echo
         echo "Files in shared volumes:"
         echo
-        ls -la /opt/airflow/{logs,dags,plugins,config}
+        ls -la /opt/airflow/{logs,dags,plugins}
         echo
-        echo "Running airflow config list to create default config file if missing."
+        echo "Change ownership of files in /opt/airflow to ${AIRFLOW__UID}:0"
         echo
-        /entrypoint airflow config list >/dev/null
+        chown -R "${AIRFLOW__UID}:0" /opt/airflow/
         echo
-        echo "Files in shared volumes:"
+        echo "Change ownership of files in shared volumes to ${AIRFLOW__UID}:0"
         echo
-        ls -la /opt/airflow/{logs,dags,plugins,config}
-        echo
-        echo "Change ownership of files in /opt/airflow to ${AIRFLOW_UID}:0"
-        echo
-        chown -R "${AIRFLOW_UID}:0" /opt/airflow/
-        echo
-        echo "Change ownership of files in shared volumes to ${AIRFLOW_UID}:0"
-        echo
-        chown -v -R "${AIRFLOW_UID}:0" /opt/airflow/{logs,dags,plugins,config}
+        chown -v -R "${AIRFLOW__UID}:0" /opt/airflow/{logs,dags,plugins}
         echo
         echo "Files in shared volumes:"
         echo
-        ls -la /opt/airflow/{logs,dags,plugins,config}
+        ls -la /opt/airflow/{logs,dags,plugins}
 
     environment:
       <<: *airflow-common-env
@@ -302,7 +296,5 @@ volumes:
   #   name: dwh_redis_data
   dwh-airflow-logs-data:
     name: dwh-airflow-logs-data
-  dwh-airflow-config-data:
-    name: dwh-airflow-config-data
   dwh-airflow-plugins-data:
     name: dwh-airflow-plugins-data
