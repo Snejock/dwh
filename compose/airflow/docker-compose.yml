@@ -51,6 +51,13 @@ x-airflow-common:
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL: 'http://dwh-airflow-apiserver:8080/execution/'
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
     AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'
+    # Пакеты ставятся в /home/airflow/.local (pip install --user, см. Dockerfile) —
+    # это часть read-only слоя образа. Без этой опции Python при каждом старте
+    # контейнера компилирует .pyc заново и пишет их в /home/airflow/.local/**/__pycache__,
+    # что триггерит overlay copy-up тысяч мелких файлов в writable-слой контейнера.
+    # Это, в свою очередь, сильно нагружает cadvisor на хосте (см. fsHandler-сканы
+    # размера writable-слоя на каждом housekeeping-цикле).
+    PYTHONDONTWRITEBYTECODE: '1'
     # dbt-проекты монтируются по одному на каждый проект (см. volumes ниже:
     # /opt/dbt/<project> + /opt/dbt-profiles/<project>/profiles.yml)
   networks:
@@ -69,9 +76,10 @@ x-airflow-common:
     - dwh-airflow-plugins-data:/opt/airflow/plugins
     # config — в репозитории (см. ./config/airflow.cfg), не в volume.
     - ./config:/opt/airflow/config
-    # dags и dbt-проекты — по одному на каждый бизнес-проект, монтируем явно.
-    # Добавляйте по три volume на новый проект (dags, dbt-код, profiles.yml).
-    - ../../../signalfire/dwh/dags:/opt/airflow/dags/signalfire
+    # dags, plugins и dbt-проекты — по одному на каждый бизнес-проект, монтируем явно.
+    # Добавляйте по четыре volume на новый проект (dags, plugins, dbt-код, profiles.yml).
+    - ../../../signalfire/dwh/airflow/dags:/opt/airflow/dags/signalfire
+    - ../../../signalfire/dwh/airflow/plugins:/opt/airflow/plugins/signalfire
     - ../../../signalfire/dwh/dbt:/opt/dbt/signalfire
     - ../../../signalfire/dwh/compose/dbt/config/profiles.yml:/opt/dbt-profiles/signalfire/profiles.yml
     - /var/run/docker.sock:/var/run/docker.sock
