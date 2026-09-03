@@ -57,7 +57,7 @@ x-airflow-common:
     # что триггерит overlay copy-up тысяч мелких файлов в writable-слой контейнера.
     # Это, в свою очередь, сильно нагружает cadvisor на хосте (см. fsHandler-сканы
     # размера writable-слоя на каждом housekeeping-цикле).
-    PYTHONDONTWRITEBYTECODE: '1'
+    PYTHONDONTWRITEBYTECODE: 'true'
     # dbt-проекты монтируются по одному на каждый проект (см. volumes ниже:
     # /opt/dbt/<project> + /opt/dbt-profiles/<project>/profiles.yml)
   networks:
