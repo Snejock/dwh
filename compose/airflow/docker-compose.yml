@@ -55,6 +55,12 @@ x-airflow-common:
     # /opt/dbt/<project> + /opt/dbt-profiles/<project>/profiles.yml)
   networks:
     - dwh-net
+  # Ограничение размера json-file лога контейнера
+  logging:
+    driver: json-file
+    options:
+      max-size: '10m'
+      max-file: '3'
   volumes:
     # logs/plugins — именованные volume (см. volumes: в конце файла).
     # Директории с правильными правами уже созданы в образе (см. Dockerfile),
