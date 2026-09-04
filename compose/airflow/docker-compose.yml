@@ -47,36 +47,25 @@ x-airflow-common:
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL: 'http://dwh-airflow-apiserver:8080/execution/'
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
     AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'
-    # PYTHONDONTWRITEBYTECODE здесь намеренно НЕ ставим: пусть Python сам
-    # закеширует .pyc в writable-слое контейнера при первом импорте после
-    # старта/рестарта. Это разовая цена (~30-40с CPU на самый первый
-    # healthcheck), дальше все последующие healthcheck'и (каждые 90с) читают
-    # уже готовый кеш и укладываются в единицы секунд. Раньше здесь стоял
-    # compileall на этапе сборки образа (см. Dockerfile), чтобы не давать
-    # cAdvisor сканировать разросшийся writable-слой — но эта причина ушла:
-    # cAdvisor's disk-metric отключён на уровне инфры (см. compose/cadvisor
-    # в проекте infra), так что сборка образа больше не оптимизируется под него.
     HOME: /home/airflow
     # dbt-проекты монтируются по одному на каждый проект (см. volumes ниже:
     # /opt/dbt/<project> + /opt/dbt-profiles/<project>/profiles.yml)
   networks:
     - dwh-net
-  # Ограничение размера json-file лога контейнера
   logging:
     driver: json-file
     options:
       max-size: '10m'
       max-file: '3'
   volumes:
-    # logs/plugins — именованные volume (см. volumes: в конце файла).
-    # Директории с правильными правами уже созданы в образе (см. Dockerfile),
-    # Docker наполнит ими volume при первом использовании.
+    # директории с правильными правами уже созданы в образе (см. Dockerfile),
+    # Docker наполнит ими volume при первом использовании
     - dwh-airflow-logs-data:/opt/airflow/logs
     - dwh-airflow-plugins-data:/opt/airflow/plugins
-    # config — в репозитории (см. ./config/airflow.cfg), не в volume.
+    # config — в репозитории (см. ./config/airflow.cfg), не в volume
     - ./config:/opt/airflow/config
     # dags, plugins и dbt-проекты — по одному на каждый бизнес-проект, монтируем явно.
-    # Добавляйте по четыре volume на новый проект (dags, plugins, dbt-код, profiles.yml).
+    # добавление по четыре volume на новый проект (dags, plugins, dbt-код, profiles.yml)
     - ../../../signalfire/dwh/airflow/dags:/opt/airflow/dags/signalfire
     - ../../../signalfire/dwh/airflow/plugins:/opt/airflow/plugins/signalfire
     - ../../../signalfire/dwh/dbt:/opt/dbt/signalfire
@@ -138,10 +127,6 @@ services:
         condition: service_completed_successfully
     healthcheck:
       test: ['CMD-SHELL', 'airflow jobs check --job-type DagProcessorJob --hostname "$$(hostname)"']
-      # timeout увеличен: healthcheck поднимает новый python-процесс и делает
-      # `import airflow` с нуля — на этом стеке (даже с прогретым .pyc-кешем,
-      # см. Dockerfile) это ощутимо небыстро, 5с было мало и check всегда падал
-      # по таймауту, а не по факту.
       interval: 90s
       timeout: 60s
       retries: 3
@@ -158,7 +143,6 @@ services:
         condition: service_completed_successfully
     healthcheck:
       test: ['CMD-SHELL', 'airflow jobs check --job-type TriggererJob --hostname "$${HOSTNAME}"']
-      # timeout увеличен: см. комментарий в healthcheck dwh-airflow-dag-processor.
       interval: 90s
       timeout: 60s
       retries: 3
