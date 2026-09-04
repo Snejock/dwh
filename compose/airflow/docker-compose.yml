@@ -1,4 +1,4 @@
-# Базовая конфигурация кластера Airflow на CeleryExecutor с Redis и PostgreSQL.
+# Базовая конфигурация кластера Airflow на LocalExecutor с PostgreSQL.
 #
 # ВНИМАНИЕ: эта конфигурация — для локальной разработки. Не используйте её в продакшене.
 #
@@ -37,13 +37,9 @@ x-airflow-common:
     - 1.1.1.1
   environment:
     &airflow-common-env
-    AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
     AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@dwh-pg-1/airflow
-    AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@dwh-pg-1/airflow
-    # Используем общий Redis проекта (compose/redis), а не отдельный инстанс.
-    # db 1, чтобы не пересекаться с redpanda-connect (использует db 0).
-    AIRFLOW__CELERY__BROKER_URL: redis://:@dwh-rd-1:6379/1
     AIRFLOW__CORE__FERNET_KEY: ''
     AIRFLOW__API__SECRET_KEY: ${AIRFLOW__API_SECRET_KEY:?AIRFLOW__API_SECRET_KEY не задан в .env}
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
@@ -55,7 +51,7 @@ x-airflow-common:
     # /home/airflow/.local уже закеширован на этапе сборки образа (см. Dockerfile,
     # шаг compileall) — исходники и .pyc из одного build-слоя, поэтому рантайм
     # ничего не дозаписывает. А без готового кеша каждый холодный интерпретатор
-    # компилирует весь стек airflow/sqlalchemy/celery с нуля — это 30-40+ секунд
+    # компилирует весь стек airflow/sqlalchemy с нуля — это 30-40+ секунд
     # CPU-времени на КАЖДЫЙ новый процесс (healthcheck, подпроцессы парсинга DAG'ов).
     HOME: /home/airflow
     # dbt-проекты монтируются по одному на каждый проект (см. volumes ниже:
@@ -87,31 +83,10 @@ x-airflow-common:
   user: root  # нужны права root для доступа к docker.sock
   depends_on:
     &airflow-common-depends-on
-    dwh-rd-1:
-      condition: service_healthy
     dwh-pg-1:
       condition: service_healthy
 
 services:
-  # redis:
-  #   # Redis ограничен версией 7.2-bookworm из-за изменения лицензии
-  #   # https://redis.io/blog/redis-adopts-dual-source-available-licensing/
-  #   image: redis:7.2-bookworm
-  #   container_name: dwh_redis
-  #   restart: unless-stopped
-  #   networks:
-  #     - dwh-net
-  #   expose:
-  #     - 6379
-  #   volumes:
-  #     - dwh_redis_data:/data
-  #   healthcheck:
-  #     test: ['CMD', 'redis-cli', 'ping']
-  #     interval: 30s
-  #     timeout: 5s
-  #     retries: 5
-  #     start_period: 30s
-
   dwh-airflow-apiserver:
     <<: *airflow-common
     container_name: dwh-airflow-apiserver
@@ -164,33 +139,6 @@ services:
       # `import airflow` с нуля — на этом стеке (даже с прогретым .pyc-кешем,
       # см. Dockerfile) это ощутимо небыстро, 5с было мало и check всегда падал
       # по таймауту, а не по факту.
-      interval: 90s
-      timeout: 60s
-      retries: 3
-      start_period: 60s
-
-  dwh-airflow-worker:
-    <<: *airflow-common
-    container_name: dwh-airflow-worker
-    command: celery worker
-    restart: unless-stopped
-    environment:
-      <<: *airflow-common-env
-      # Нужно для корректного «тёплого» завершения celery-воркеров
-      # См. https://airflow.apache.org/docs/docker-stack/entrypoint.html#signal-propagation
-      DUMB_INIT_SETSID: '0'
-    depends_on:
-      <<: *airflow-common-depends-on
-      dwh-airflow-apiserver:
-        condition: service_healthy
-      dwh-airflow-init:
-        condition: service_completed_successfully
-    healthcheck:
-      test:
-        - 'CMD-SHELL'
-        - 'celery --app airflow.providers.celery.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}" || celery --app airflow.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}"'
-      # timeout увеличен: см. комментарий в healthcheck dwh-airflow-dag-processor —
-      # холодный python-процесс + import airflow/celery занимает больше, чем 5с.
       interval: 90s
       timeout: 60s
       retries: 3
@@ -313,8 +261,6 @@ services:
       <<: *airflow-common-depends-on
 
 volumes:
-  # dwh_redis_data:
-  #   name: dwh_redis_data
   dwh-airflow-logs-data:
     name: dwh-airflow-logs-data
   dwh-airflow-plugins-data:
