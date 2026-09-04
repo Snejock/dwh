@@ -47,12 +47,15 @@ x-airflow-common:
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL: 'http://dwh-airflow-apiserver:8080/execution/'
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
     AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'
-    # PYTHONDONTWRITEBYTECODE здесь намеренно НЕ ставим: байткод для всего
-    # /home/airflow/.local уже закеширован на этапе сборки образа (см. Dockerfile,
-    # шаг compileall) — исходники и .pyc из одного build-слоя, поэтому рантайм
-    # ничего не дозаписывает. А без готового кеша каждый холодный интерпретатор
-    # компилирует весь стек airflow/sqlalchemy с нуля — это 30-40+ секунд
-    # CPU-времени на КАЖДЫЙ новый процесс (healthcheck, подпроцессы парсинга DAG'ов).
+    # PYTHONDONTWRITEBYTECODE здесь намеренно НЕ ставим: пусть Python сам
+    # закеширует .pyc в writable-слое контейнера при первом импорте после
+    # старта/рестарта. Это разовая цена (~30-40с CPU на самый первый
+    # healthcheck), дальше все последующие healthcheck'и (каждые 90с) читают
+    # уже готовый кеш и укладываются в единицы секунд. Раньше здесь стоял
+    # compileall на этапе сборки образа (см. Dockerfile), чтобы не давать
+    # cAdvisor сканировать разросшийся writable-слой — но эта причина ушла:
+    # cAdvisor's disk-metric отключён на уровне инфры (см. compose/cadvisor
+    # в проекте infra), так что сборка образа больше не оптимизируется под него.
     HOME: /home/airflow
     # dbt-проекты монтируются по одному на каждый проект (см. volumes ниже:
     # /opt/dbt/<project> + /opt/dbt-profiles/<project>/profiles.yml)
