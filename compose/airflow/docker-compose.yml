@@ -135,10 +135,13 @@ services:
       # state='running' и heartbeat свежее health_check_threshold.
       # 30 секунд — значение [dag_processor] health_check_threshold из
       # airflow.cfg; если меняете его там, поменяйте и здесь.
+      # CMD-SHELL выполняется через /bin/sh (в этом образе — dash, не bash),
+      # поэтому bash-подстановка ${VAR/from/to} тут не работает — используем
+      # sed, он есть в любом sh.
       test:
         - CMD-SHELL
         - >-
-          conn="$${AIRFLOW__DATABASE__SQL_ALCHEMY_CONN/+psycopg2/}";
+          conn=$$(echo "$$AIRFLOW__DATABASE__SQL_ALCHEMY_CONN" | sed 's/+psycopg2//');
           psql "$$conn" -tAc "select (state='running' and now() - latest_heartbeat < interval '30 seconds') from job where job_type='DagProcessorJob' and hostname='$$(hostname)' order by latest_heartbeat desc limit 1;" | grep -qx t
       interval: 90s
       timeout: 10s
@@ -159,10 +162,11 @@ services:
       # 'airflow jobs check' на прямой SQL-запрос, тот же выигрыш (~16-18с
       # -> <1с на вызов). 30 секунд — значение [triggerer]
       # triggerer_health_check_threshold из airflow.cfg.
+      # См. комментарий у dwh-airflow-dag-processor про dash vs bash.
       test:
         - CMD-SHELL
         - >-
-          conn="$${AIRFLOW__DATABASE__SQL_ALCHEMY_CONN/+psycopg2/}";
+          conn=$$(echo "$$AIRFLOW__DATABASE__SQL_ALCHEMY_CONN" | sed 's/+psycopg2//');
           psql "$$conn" -tAc "select (state='running' and now() - latest_heartbeat < interval '30 seconds') from job where job_type='TriggererJob' and hostname='$$(hostname)' order by latest_heartbeat desc limit 1;" | grep -qx t
       interval: 90s
       timeout: 10s
