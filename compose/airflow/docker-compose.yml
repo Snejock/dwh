@@ -126,9 +126,22 @@ services:
       dwh-airflow-init:
         condition: service_completed_successfully
     healthcheck:
-      test: ['CMD-SHELL', 'airflow jobs check --job-type DagProcessorJob --hostname "$$(hostname)"']
+      # Не используем 'airflow jobs check': это ~16-18с на каждый вызов,
+      # из них ~13с — просто холодный import airflow (провайдеры, конфиг,
+      # логгинг), а не полезная работа. При interval=90s это давало реальный
+      # цикл нагрузки ~90+18=108с ("раз в 2 минуты"), а не 90с.
+      # Вместо этого напрямую воспроизводим логику Job.is_alive()
+      # (airflow/jobs/job.py) через SQL к той же метабазе: job жив, если
+      # state='running' и heartbeat свежее health_check_threshold.
+      # 30 секунд — значение [dag_processor] health_check_threshold из
+      # airflow.cfg; если меняете его там, поменяйте и здесь.
+      test:
+        - CMD-SHELL
+        - >-
+          conn="$${AIRFLOW__DATABASE__SQL_ALCHEMY_CONN/+psycopg2/}";
+          psql "$$conn" -tAc "select (state='running' and now() - latest_heartbeat < interval '30 seconds') from job where job_type='DagProcessorJob' and hostname='$$(hostname)' order by latest_heartbeat desc limit 1;" | grep -qx t
       interval: 90s
-      timeout: 60s
+      timeout: 10s
       retries: 3
       start_period: 60s
 
@@ -142,9 +155,17 @@ services:
       dwh-airflow-init:
         condition: service_completed_successfully
     healthcheck:
-      test: ['CMD-SHELL', 'airflow jobs check --job-type TriggererJob --hostname "$${HOSTNAME}"']
+      # См. комментарий у dwh-airflow-dag-processor: та же замена
+      # 'airflow jobs check' на прямой SQL-запрос, тот же выигрыш (~16-18с
+      # -> <1с на вызов). 30 секунд — значение [triggerer]
+      # triggerer_health_check_threshold из airflow.cfg.
+      test:
+        - CMD-SHELL
+        - >-
+          conn="$${AIRFLOW__DATABASE__SQL_ALCHEMY_CONN/+psycopg2/}";
+          psql "$$conn" -tAc "select (state='running' and now() - latest_heartbeat < interval '30 seconds') from job where job_type='TriggererJob' and hostname='$$(hostname)' order by latest_heartbeat desc limit 1;" | grep -qx t
       interval: 90s
-      timeout: 60s
+      timeout: 10s
       retries: 3
       start_period: 60s
 
