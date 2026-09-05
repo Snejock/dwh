@@ -126,18 +126,6 @@ services:
       dwh-airflow-init:
         condition: service_completed_successfully
     healthcheck:
-      # Не используем 'airflow jobs check': это ~16-18с на каждый вызов,
-      # из них ~13с — просто холодный import airflow (провайдеры, конфиг,
-      # логгинг), а не полезная работа. При interval=90s это давало реальный
-      # цикл нагрузки ~90+18=108с ("раз в 2 минуты"), а не 90с.
-      # Вместо этого напрямую воспроизводим логику Job.is_alive()
-      # (airflow/jobs/job.py) через SQL к той же метабазе: job жив, если
-      # state='running' и heartbeat свежее health_check_threshold.
-      # 30 секунд — значение [dag_processor] health_check_threshold из
-      # airflow.cfg; если меняете его там, поменяйте и здесь.
-      # CMD-SHELL выполняется через /bin/sh (в этом образе — dash, не bash),
-      # поэтому bash-подстановка ${VAR/from/to} тут не работает — используем
-      # sed, он есть в любом sh.
       test:
         - CMD-SHELL
         - >-
@@ -158,11 +146,6 @@ services:
       dwh-airflow-init:
         condition: service_completed_successfully
     healthcheck:
-      # См. комментарий у dwh-airflow-dag-processor: та же замена
-      # 'airflow jobs check' на прямой SQL-запрос, тот же выигрыш (~16-18с
-      # -> <1с на вызов). 30 секунд — значение [triggerer]
-      # triggerer_health_check_threshold из airflow.cfg.
-      # См. комментарий у dwh-airflow-dag-processor про dash vs bash.
       test:
         - CMD-SHELL
         - >-
