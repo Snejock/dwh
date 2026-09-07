@@ -1,0 +1,3 @@
+<clickhouse>
+    <interserver_http_host>loki</interserver_http_host>
+</clickhouse>
