@@ -27,5 +27,21 @@
                 </replica>
             </shard>
         </sharded>
+        <replicated>
+            <shard>
+                <replica>
+                    <host>odin</host>
+                    <port>9000</port>
+                    <user from_env="CLICKHOUSE_USER" />
+                    <password from_env="CLICKHOUSE_PASSWORD" />
+                </replica>
+                <replica>
+                    <host>loki</host>
+                    <port>9000</port>
+                    <user from_env="CLICKHOUSE_USER" />
+                    <password from_env="CLICKHOUSE_PASSWORD" />
+                </replica>
+            </shard>
+        </replicated>
     </remote_servers>
 </clickhouse>
