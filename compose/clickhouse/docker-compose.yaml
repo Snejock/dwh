@@ -18,16 +18,6 @@ services:
       - CLICKHOUSE_KEEPER_SERVER_ID=${CLICKHOUSE__KEEPER_SERVER_ID}
       - CLICKHOUSE_USER=${CLICKHOUSE__USER}
       - CLICKHOUSE_PASSWORD=${CLICKHOUSE__PASSWORD}
-      # Официальный entrypoint образа (см. /entrypoint.sh внутри контейнера) при заданном
-      # CLICKHOUSE_USER безусловно ПЕРЕЗАПИСЫВАЕТ config/users.d/default-user.xml на каждом
-      # старте контейнера — сгенерированным шаблоном без named_collection_control и без
-      # <grants> (access_management там всегда 0, если явно не задать
-      # CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT). Это стирало любые ручные/закоммиченные правки
-      # того файла при каждом restart — конкретно поэтому core не мог получить право на
-      # CREATE NAMED COLLECTION (см. signalfire/dwh/migrations/ch/016_create_named_collection_core.sql).
-      # SKIP_USER_SETUP отключает эту перезапись — users.d/default-user.xml из этого репозитория
-      # используется как есть.
-      - CLICKHOUSE_SKIP_USER_SETUP=1
     volumes:
       - ch-data:/var/lib/clickhouse
       - ch-logs:/var/log/clickhouse-server
