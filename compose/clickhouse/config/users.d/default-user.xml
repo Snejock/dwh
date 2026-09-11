@@ -1,10 +1,9 @@
 <clickhouse>
   <!-- Docs: <https://clickhouse.com/docs/operations/settings/settings_users/> -->
+  <!-- users.xml не определяет пользователя default, поэтому убирать его здесь через
+       remove="remove" не нужно (и нельзя — merge упадёт с "Not found: users.default",
+       если в базовом конфиге нечего удалять). -->
   <users>
-    <!-- Remove default user -->
-    <default remove="remove">
-    </default>
-
     <core>
       <profile>default</profile>
       <networks>
