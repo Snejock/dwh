@@ -98,6 +98,10 @@
             </grants>
             -->
         </default>
+
+        <core>
+            <named_collection_control>1</named_collection_control>
+        </core>
     </users>
 
     <!-- Quotas. -->
