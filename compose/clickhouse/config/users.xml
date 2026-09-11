@@ -14,6 +14,18 @@
         </readonly>
     </profiles>
 
+    <!-- Users and ACL: core определён в users.d/default-user.xml, который же удаляет default. -->
+    <users>
+        <!-- Пустая заглушка: entrypoint образа (manage_clickhouse_user) безусловно делает
+             `clickhouse extract-from-config --key='users.default'` без --try, ещё до всякой
+             обработки CLICKHOUSE_SKIP_USER_SETUP. Если этого узла нет вообще — падает с
+             "Not found: users.default" (exit 232) прежде, чем стартует clickhouse-server.
+             Реальное содержимое неважно: users.d/default-user.xml всё равно удаляет default
+             через remove="remove" при мёрдже. -->
+        <default>
+        </default>
+    </users>
+
     <!-- Quotas. -->
     <quotas>
         <!-- Name of quota. -->
