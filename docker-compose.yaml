@@ -11,5 +11,5 @@ include:
 
 networks:
   dwh-net:
-    driver: bridge
     name: dwh-net
+    external: true
