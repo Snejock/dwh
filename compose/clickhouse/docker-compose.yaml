@@ -13,6 +13,7 @@ services:
     extra_hosts:
       - 'odin:${CLICKHOUSE__ODIN_IP}'
       - 'loki:${CLICKHOUSE__LOKI_IP}'
+      - '${CLICKHOUSE__NODE_NAME}:127.0.0.1'
     environment:
       # server_id для ClickHouse Keeper — свой на каждом узле, см. .env.odin/.env.loki
       - CLICKHOUSE_KEEPER_SERVER_ID=${CLICKHOUSE__KEEPER_SERVER_ID}
