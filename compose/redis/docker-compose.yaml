@@ -22,6 +22,7 @@ services:
   dwh-rd-insight:
     image: redis/redisinsight:latest
     container_name: dwh-rd-insight
+    restart: unless-stopped
     profiles:
       - loki
     ports:
